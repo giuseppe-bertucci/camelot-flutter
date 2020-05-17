@@ -12,9 +12,15 @@ class ExternalPreselection with ChangeNotifier {
     initUniLinks();
   }
 
+  @factoryMethod
+  static Future<ExternalPreselection> create() async {
+    return ExternalPreselection();
+  }
+
   static const String CATEGORY = 'rousseau.provider.deeplinks';
 
   String link = '';
+  String id = '';
   StreamSubscription<String> _sub;
 
   Future<Null> initUniLinks() async {
@@ -27,6 +33,8 @@ class ExternalPreselection with ChangeNotifier {
       developer.log('initial link: $initialLink', name: CATEGORY);
 
       link = initialLink;
+      id = _findId(link);
+
       notifyListeners();
     }
 
@@ -35,10 +43,25 @@ class ExternalPreselection with ChangeNotifier {
       developer.log('link: $link', name: CATEGORY);
 
       this.link = link;
+      id = _findId(link);
+
       notifyListeners();
 
     }, onError: (dynamic err) {
       developer.log('error: $err', name: CATEGORY);
     });
+  }
+
+  static String _findId(String url) {
+
+    final RegExp exp = RegExp(r'\/([0-9a-zA-Z=]+)\/?$');
+
+    if(exp.hasMatch(url)) {
+      String match = exp.firstMatch(url).group(1);
+      developer.log('match: $match', name: CATEGORY);
+      return match;
+    }
+
+    return '';
   }
 }
